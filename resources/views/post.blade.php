@@ -8,6 +8,9 @@
 </head>
 
 <body class="antialiased">
+  <h2>
+    {{ strtoupper($post->title)}}
+  </h2>
   <div class="">
     {!! $post->body !!}
   </div>

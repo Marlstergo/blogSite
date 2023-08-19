@@ -8,7 +8,7 @@
 </head>
 
 <body class="antialiased">
-  @yield('slot')
+  {{ $slot }}
 </body>
 
 </html>

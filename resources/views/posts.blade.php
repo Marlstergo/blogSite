@@ -1,23 +1,21 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <title>
-        Blog post
-    </title>
-</head>
-
-<body class="antialiased">
-    @foreach ($all_posts as $post)
-        <div>
-            <a href='/post/<?= $post->slug ?>'>
-                <h2>{{ $post->title }}</h2>
-            </a>
+<x-layout>
+    <div>
+        @if (count($all_posts) == 0)
             <p>
-                {{ $post->excerpt }}
+                No posts found.
             </p>
-        </div>
-    @endforeach
-</body>
+        @else
+            @foreach ($all_posts as $post)
+                <div>
+                    <a href='/post/<?= $post['id'] ?>'>
+                        <h2>{{ $post->title }}</h2>
+                    </a>
+                    <p>
+                        {{ $post->excerpt }}
+                    </p>
+                </div>
+            @endforeach
 
-</html>
+        @endif
+    </div>
+</x-layout>
