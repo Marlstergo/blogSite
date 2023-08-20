@@ -10,6 +10,13 @@ class Post extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     static function findOrFail($id)
     {
         $post = Post::where('id', $id)->first();
@@ -18,5 +25,10 @@ class Post extends Model
         } else {
             throw new ModelNotFoundException();
         }
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
