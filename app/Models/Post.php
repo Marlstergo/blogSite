@@ -4,30 +4,38 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class Post extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
-
-    // this auto add category and author query by eager loading to prevent multiple db query after each post is loaded
     protected $with = ['category', 'author'];
 
-    public function getRouteKeyName()
+    public function scopeFilter($query, array $filters)
     {
-        return 'slug';
+        $query->when($filters['search'] ?? false, fn($query, $search) =>
+            $query->where(fn($query) =>
+                $query->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('body', 'like', '%' . $search . '%')
+            )
+        );
+
+        $query->when($filters['category'] ?? false, fn($query, $category) =>
+            $query->whereHas('category', fn ($query) =>
+                $query->where('slug', $category)
+            )
+        );
+
+        $query->when($filters['author'] ?? false, fn($query, $author) =>
+            $query->whereHas('author', fn ($query) =>
+                $query->where('username', $author)
+            )
+        );
     }
 
-    static function findOrFail($id)
+    public function comments()
     {
-        $post = Post::where('id', $id)->first();
-        if ($post) {
-            return $post;
-        } else {
-            throw new ModelNotFoundException();
-        }
+        return $this->hasMany(Comment::class);
     }
 
     public function category()

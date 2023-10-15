@@ -1,47 +1,29 @@
 <?php
 
-use App\Models\Category;
-use App\Models\Post;
-use App\Models\User;
-use Illuminate\Support\Facades\File;
+use App\Http\Controllers\AdminPostController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\PostCommentsController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\SessionsController;
 use Illuminate\Support\Facades\Route;
-use Spatie\YamlFrontMatter\YamlFrontMatter;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+Route::get('/', [PostController::class, 'index'])->name('home');
 
-Route::get('/', function () {
-    $all_posts = Post::latest('id')->get();
-    // $all_posts = Post::all();
-    // dd($all_posts->last()->category->slug);
-    // logger('maliq');
-    // dd($all_posts);
-    $latest_posts = $all_posts[0];
-    // dd($latest_posts);
+Route::get('posts/{post:slug}', [PostController::class, 'show']);
+Route::post('posts/{post:slug}/comments', [PostCommentsController::class, 'store']);
 
-    return view('posts', ['all_posts' => $all_posts, 'latest_posts' => $latest_posts]);
-});
+Route::post('newsletter', NewsletterController::class);
 
-Route::get('/post/{post:slug}', function (Post $post) {
-    // $post = Post::findOrFail($post);
-    return view('post', ['post' => $post]);
-});
+Route::get('register', [RegisterController::class, 'create'])->middleware('guest');
+Route::post('register', [RegisterController::class, 'store'])->middleware('guest');
 
-Route::get('/category/{category:slug}', function (Category $category) {
-    $posts = $category->posts;
-    // dd($posts->first()->get());
-    return view('categories', ['all_posts' => $posts]);
-});
-  
-Route::get('author/{author:username}', function (User $author) {
-    $posts = $author->posts;
-    return view('posts', ['all_posts' => $posts]);
+Route::get('login', [SessionsController::class, 'create'])->middleware('guest');
+Route::post('login', [SessionsController::class, 'store'])->middleware('guest');
+
+Route::post('logout', [SessionsController::class, 'destroy'])->middleware('auth');
+
+// Admin Section
+Route::middleware('can:admin')->group(function () {
+    Route::resource('admin/posts', AdminPostController::class)->except('show');
 });
